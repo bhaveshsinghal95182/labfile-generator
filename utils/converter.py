@@ -1,5 +1,8 @@
 import os
 import subprocess
+from rich.console import Console
+
+CONSOLE = Console()
 
 # --- Configuration ---
 # Use os.path.expanduser to correctly handle the '~' for your home directory
@@ -13,29 +16,37 @@ LINES_TO_REMOVE = [
     "### **How certain keywords are used in the above example**"
 ]
 
-# --- Main Script ---
-
-def convert_files():
+def convert_files(md_input_dir: str = "", docx_output_dir: str = "", template_file: str = ""):
     """
     Loops through lab files, cleans them, adds a heading,
     and converts them to DOCX using Pandoc.
     """
-    print("🚀 Starting conversion process...")
+    CONSOLE.print("🚀 Starting conversion process...")
+
+    # Ensure the template file exists before we start
+    template_file = template_file or TEMPLATE_FILE
+    if not os.path.exists(template_file):
+        CONSOLE.print(f"❌ [bold red]CRITICAL ERROR: The template file '{template_file}' was not found.[/bold red]")
+        CONSOLE.print("Please ensure the template file exists in the 'template' directory.")
+        return
+
+    # Determine input/output directories (allow overrides)
+    md_input_dir = md_input_dir or INPUT_DIR
+    docx_output_dir = docx_output_dir or OUTPUT_DIR
 
     # Create the output directory if it doesn't exist
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    os.makedirs(docx_output_dir, exist_ok=True)
 
     # Loop through Experiment 1 to 12
     for i in range(1, 13):
         md_filename = f"Experiment {i}.md"
         docx_filename = f"experiment{i}.docx"
-        
-        input_path = os.path.join(INPUT_DIR, md_filename)
-        output_path = os.path.join(OUTPUT_DIR, docx_filename)
+        input_path = os.path.join(md_input_dir, md_filename)
+        output_path = os.path.join(docx_output_dir, docx_filename)
         
         # Check if the source file actually exists
         if not os.path.exists(input_path):
-            print(f"⚠️  Skipping: {md_filename} not found.")
+            CONSOLE.print(f"⚠️  Skipping: {md_filename} not found.")
             continue
 
         try:
@@ -49,45 +60,33 @@ def convert_files():
 
             # 3. Add the new title at the top as a Markdown H1 heading
             heading_text = f"Experiment - {i}"
-            # The '# ' makes it a "Heading 1" in Markdown.
-            # The '\n\n' ensures it's properly separated from the content.
-            final_content = f"# {heading_text}\n\n{content}"
+            final_content = f"# {heading_text}\\n\\n{content}"
 
             # 4. Build and run the Pandoc command
             command = [
                 'pandoc',
-                '--from', 'markdown',        # Input format
-                '--to', 'docx',              # Output format
-                '--no-highlight',            # As you requested
-                '--reference-doc', TEMPLATE_FILE, # Our styled template!
-                '--output', output_path      # The final output file path
+                '--from', 'markdown',
+                '--to', 'docx',
+                '--no-highlight',
+                '--reference-doc', template_file,
+                '--output', output_path
             ]
             
-            # We pipe the modified content directly to Pandoc's stdin
             subprocess.run(
                 command, 
                 input=final_content, 
                 encoding='utf-8', 
-                check=True # This will raise an error if pandoc fails
+                check=True
             )
             
-            print(f"✅ Successfully converted {md_filename} to {docx_filename}")
+            CONSOLE.print(f"✅ Successfully converted [bold green]{md_filename}[/bold green] to [bold green]{docx_filename}[/bold green]")
 
         except FileNotFoundError:
-            print(f"❌ ERROR: pandoc command not found. Is Pandoc installed and in your PATH?")
+            CONSOLE.print(f"❌ [bold red]ERROR: pandoc command not found. Is Pandoc installed and in your PATH?[/bold red]")
             break
         except subprocess.CalledProcessError as e:
-            print(f"❌ ERROR: Pandoc failed to convert {md_filename}. Details: {e}")
+            CONSOLE.print(f"❌ [bold red]ERROR: Pandoc failed to convert {md_filename}. Details: {e}[/bold red]")
         except Exception as e:
-            print(f"❌ An unexpected error occurred with {md_filename}: {e}")
+            CONSOLE.print(f"❌ [bold red]An unexpected error occurred with {md_filename}: {e}[/bold red]")
 
-    print("\n✨ All done!")
-
-
-if __name__ == "__main__":
-    # Ensure the template file exists before we start
-    if not os.path.exists(TEMPLATE_FILE):
-        print(f"❌ CRITICAL ERROR: The template file '{TEMPLATE_FILE}' was not found.")
-        print("Please follow Step 1 to create it and place it in this directory.")
-    else:
-        convert_files()
+    CONSOLE.print("\\n✨ All done!")
