@@ -147,9 +147,12 @@ def manual_entry_mode(subject_name, output_dir):
     if created_files:
         convert_now = questionary.confirm("Do you want to convert the generated MD files to DOCX now?", default=True).ask()
         if convert_now:
-            docx_base = questionary.text("Enter base docs output directory:", default=os.path.expanduser('~/college/software-craftsmanship')).ask()
             subject_dirname = _sanitize_subject(subject_name)
-            docx_output_dir = os.path.join(os.path.expanduser(docx_base), subject_dirname)
+            default_docs = os.path.expanduser(f"~/college/{subject_dirname}")
+            docx_output_dir = questionary.path(
+                "Enter docs output directory:",
+                default=default_docs
+            ).ask() or default_docs
             os.makedirs(docx_output_dir, exist_ok=True)
             convert_md_to_docs(md_input_dir=output_dir, docx_output_dir=docx_output_dir)
 
@@ -183,14 +186,16 @@ def ai_deduction_mode(subject_name, system_instruction, output_dir):
                 created = generate_md_file(exp['number'], exp['aim'], subject_name, output_dir)
                 if created:
                     created_files.append(created)
-
             # After generating, offer conversion
             if created_files:
                 convert_now = questionary.confirm("Do you want to convert the generated MD files to DOCX now?", default=True).ask()
                 if convert_now:
-                    docx_base = questionary.text("Enter base docs output directory:", default=os.path.expanduser('~/college/software-craftsmanship')).ask()
                     subject_dirname = _sanitize_subject(subject_name)
-                    docx_output_dir = os.path.join(os.path.expanduser(docx_base), subject_dirname)
+                    default_docs = os.path.expanduser(f"~/college/{subject_dirname}")
+                    docx_output_dir = questionary.path(
+                        "Enter docs output directory:",
+                        default=default_docs
+                    ).ask() or default_docs
                     os.makedirs(docx_output_dir, exist_ok=True)
                     convert_md_to_docs(md_input_dir=output_dir, docx_output_dir=docx_output_dir)
     else:
@@ -221,6 +226,8 @@ def main():
             break
         os.makedirs(output_dir, exist_ok=True)
         CONSOLE.print(f"MD files will be saved in: [bold cyan]{output_dir}[/bold cyan]")
+        # ensure we have a sanitized subject dirname for downstream paths
+        subject_dirname = _sanitize_subject(subject_name)
 
         main_choice = questionary.select(
             "Choose an option:",
@@ -237,9 +244,13 @@ def main():
         elif main_choice == "manual":
             manual_entry_mode(subject_name, output_dir)
         elif main_choice == "convert":
-            # Convert MD files for this subject to DOCX. Place outputs in a subject-scoped folder.
-            docx_base = os.path.expanduser('~/college/software-craftsmanship')
-            docx_output_dir = os.path.join(docx_base, subject_dirname)
+            # Convert MD files for this subject to DOCX. Ask for base output dir (defaults to ~/college/software-craftsmanship)
+            # Default directly to ~/college/<subject_name>
+            default_docs = os.path.expanduser(f"~/college/{subject_dirname}")
+            docx_output_dir = questionary.path(
+                "Enter docs output directory:",
+                default=default_docs
+            ).ask() or default_docs
             os.makedirs(docx_output_dir, exist_ok=True)
             convert_md_to_docs(md_input_dir=output_dir, docx_output_dir=docx_output_dir)
         elif main_choice == "exit" or not main_choice:
