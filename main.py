@@ -216,9 +216,9 @@ def main():
             qmark="🤖"
         ).ask()
 
-        base_md_dir = os.path.expanduser('~/vault/College')
-        subject_dirname = _sanitize_subject(subject_name)
-        output_dir = os.path.join(base_md_dir, subject_dirname)
+        output_dir = questionary.path("Enter the output directory for the markdown files:", default=os.path.expanduser(f'~/Documents/{_sanitize_subject(subject_name)}')).ask()
+        if not output_dir:
+            break
         os.makedirs(output_dir, exist_ok=True)
         CONSOLE.print(f"MD files will be saved in: [bold cyan]{output_dir}[/bold cyan]")
 
