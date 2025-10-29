@@ -10,7 +10,6 @@ dependencies = [
     "python-dotenv",
     "questionary",
     "rich",
-    "uv",
 ]
 
 [project.scripts]
