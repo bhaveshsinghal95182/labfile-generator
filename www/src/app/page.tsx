@@ -6,6 +6,7 @@ import PencilOutline from "@/components/icons/pencil-outline";
 import List from "@/components/icons/list";
 import AimsList from "@/components/aims-list";
 import { Button } from "@/components/ui/button";
+import { StatefulButton } from "@/components/ui/stateful-button";
 import {
   Tooltip,
   TooltipContent,
@@ -23,10 +24,34 @@ export default function Home() {
 
     or you can just copy the blob of text here and let ai decide the AIMs
     `);
-  const [isMarkdown, setIsMarkdown] = useState(false);
+  const [isMarkdown, setIsMarkdown] = useState(true);
+  const [aims, setAims] = useState<string[]>([]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(event.target.value);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await fetch("/api/aims/extract", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ content }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to extract aims");
+      }
+
+      const data = await response.json();
+      setAims(data.aims);
+      setIsMarkdown(false);
+    } catch (error) {
+      console.error("Error extracting aims:", error);
+      // You might want to show an error to the user here
+    }
   };
 
   return (
@@ -100,12 +125,16 @@ export default function Home() {
               transition={{ duration: 0.2 }}
             >
               {isMarkdown ? (
+                <>
                 <Textarea
                   value={content}
                   onChange={handleChange}
                   className="h-[80%] p-6 sm:p-8 resize-none text-lg font-mono leading-relaxed placeholder:text-muted-foreground scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700"
                   placeholder="Start writing your text or markdown here..."
                 />
+                <StatefulButton onClick={handleSubmit}>AI Extract</StatefulButton>
+                <p>{aims.join(", ")}</p>
+                </>
               ) : (
                 <AimsList />
               )}
