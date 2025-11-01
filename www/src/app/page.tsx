@@ -1,18 +1,10 @@
 "use client";
 import { Textarea } from "@/components/ui/textarea";
-import { ButtonGroup } from "@/components/ui/button-group";
 import { useState } from "react";
-import PencilOutline from "@/components/icons/pencil-outline";
-import List from "@/components/icons/list";
 import AimsList from "@/components/aims-list";
-import { Button } from "@/components/ui/button";
 import { StatefulButton } from "@/components/ui/stateful-button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { AnimatePresence, motion } from "motion/react";
+import ViewModeToggle from "@/components/view-mode-toggle";
 
 export default function Home() {
   const [content, setContent] = useState(`
@@ -68,53 +60,9 @@ export default function Home() {
         We can combine 1 and 3 by using a markdown editor that supports both raw text and md rendering
         For 2, we can have a structured form input
         */}
-                <div className="grow w-full max-w-5xl mx-auto h-[75vh]">
-          <div className="flex justify-end p-2">
-            <div className="relative flex items-center rounded-lg border border-input">
-              <ButtonGroup
-                className="border-input"
-                aria-label="Toggle between Markdown and List views"
-              >
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size={"icon"}
-                      className="relative z-0 text-foreground"
-                      onClick={() => setIsMarkdown(true)}
-                      aria-pressed={isMarkdown}
-                    >
-                      <PencilOutline size="24" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Editor view</p>
-                  </TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size={"icon"}
-                      className="relative z-0 text-foreground"
-                      onClick={() => setIsMarkdown(false)}
-                      aria-pressed={!isMarkdown}
-                    >
-                      <List size="24" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>List view</p>
-                  </TooltipContent>
-                </Tooltip>
-              </ButtonGroup>
-              <motion.div
-                className="absolute z-10 h-full w-1/2 rounded-md bg-white mix-blend-difference"
-                initial={{ x: isMarkdown ? 0 : "100%" }}
-                animate={{ x: isMarkdown ? 0 : "100%" }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              />
-            </div>
+        <div className="grow w-full max-w-5xl mx-auto h-[75vh]">
+          <div className="flex justify-end pb-4">
+            <ViewModeToggle isMarkdown={isMarkdown} onChange={setIsMarkdown} />
           </div>
           <AnimatePresence mode="wait">
             <motion.div
@@ -126,14 +74,17 @@ export default function Home() {
             >
               {isMarkdown ? (
                 <>
-                <Textarea
-                  value={content}
-                  onChange={handleChange}
-                  className="h-[80%] p-6 sm:p-8 resize-none text-lg font-mono leading-relaxed placeholder:text-muted-foreground scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700"
-                  placeholder="Start writing your text or markdown here..."
-                />
-                <StatefulButton onClick={handleSubmit}>AI Extract</StatefulButton>
-                <p>{aims.join(", ")}</p>
+                  <Textarea
+                    value={content}
+                    onChange={handleChange}
+                    className="h-[80%] p-6 sm:p-8 resize-none text-lg font-mono leading-relaxed placeholder:text-muted-foreground scrollbar-thin scrollbar-thumb-gray-400 dark:scrollbar-thumb-gray-700"
+                    placeholder="Start writing your text or markdown here..."
+                  />
+                  <div className="flex justify-end">
+                    <StatefulButton onClick={handleSubmit} className="mt-4">
+                      AI Extract
+                    </StatefulButton>
+                  </div>
                 </>
               ) : (
                 <AimsList />
