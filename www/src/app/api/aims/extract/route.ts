@@ -1,7 +1,8 @@
 import { google } from "@ai-sdk/google";
-import { generateObject, UIMessage } from "ai";
+import { generateObject } from "ai";
 import { z } from "zod";
 import { NextRequest, NextResponse } from "next/server";
+import { aimSchema } from "@/lib/types";
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30;
@@ -12,7 +13,7 @@ export async function POST(req: NextRequest) {
   const { object } = await generateObject({
     model: google("gemini-2.5-flash-lite"),
     schema: z.object({
-      aims: z.array(z.string()),
+      aims: aimSchema.array(),
     }),
     prompt: `You are given the following content: ${content}
     
