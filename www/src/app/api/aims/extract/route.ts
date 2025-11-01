@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   const { object } = await generateObject({
     model: google("gemini-2.5-flash-lite"),
     schema: z.object({
-      aims: practicalsSchema.array(),
+      practicals: practicalsSchema.array(),
     }),
     prompt: `You are given the following content: ${content}
     
@@ -34,5 +34,5 @@ export async function POST(req: NextRequest) {
     `,
   });
 
-  return NextResponse.json({ aims: object.aims });
+  return NextResponse.json({ practicals: object.practicals });
 }

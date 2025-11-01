@@ -5,6 +5,7 @@ import AimsList from "@/components/aims-list";
 import { StatefulButton } from "@/components/ui/stateful-button";
 import { AnimatePresence, motion } from "motion/react";
 import ViewModeToggle from "@/components/view-mode-toggle";
+import { Practical } from "@/lib/types";
 
 export default function Home() {
   const [content, setContent] = useState(`
@@ -17,7 +18,7 @@ export default function Home() {
     or you can just copy the blob of text here and let ai decide the AIMs
     `);
   const [isMarkdown, setIsMarkdown] = useState(true);
-  const [aims, setAims] = useState<string[]>([]);
+  const [practicals, setPracticals] = useState<Practical[]>([]);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(event.target.value);
@@ -38,11 +39,10 @@ export default function Home() {
       }
 
       const data = await response.json();
-      setAims(data.aims);
+      setPracticals(data.practicals);
       setIsMarkdown(false);
     } catch (error) {
       console.error("Error extracting aims:", error);
-      // You might want to show an error to the user here
     }
   };
 
@@ -87,7 +87,7 @@ export default function Home() {
                   </div>
                 </>
               ) : (
-                <AimsList />
+                <AimsList practicals={practicals} onChange={setPracticals} />
               )}
             </motion.div>
           </AnimatePresence>
