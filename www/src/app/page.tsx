@@ -50,7 +50,7 @@ export default function Home() {
     <div className="flex min-h-screen items-center justify-center">
       <div className="">
         <h1 className="text-5xl font-bold mb-8">
-          Let's start by getting to know the aims
+          Let&apos;s start by getting to know the aims
         </h1>
         {/* So the requirement is to create an experience of 3 types
         1. Textarea where user can input/paste the aims as a text blob
