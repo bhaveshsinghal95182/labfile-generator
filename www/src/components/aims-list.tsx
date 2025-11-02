@@ -9,46 +9,40 @@ import {
 import { Button } from "./ui/button";
 import { Practical } from "@/lib/types";
 import { AnimatePresence, motion } from "motion/react";
+import { usePracticalsStore } from "@/context/practicals-store";
 
-type Props = {
-  practicals?: Practical[];
-  onChange?: (next: Practical[]) => void;
-};
+export default function AimsList() {
+  const practicals = usePracticalsStore((s) => s.practicals);
+  const setPracticals = usePracticalsStore((s) => s.setPracticals);
+  const addPractical = usePracticalsStore((s) => s.addPractical);
+  const updatePractical = usePracticalsStore((s) => s.updatePractical);
+  const removePractical = usePracticalsStore((s) => s.removePractical);
+  const clear = usePracticalsStore((s) => s.clear);
 
-export default function AimsList({ practicals = [], onChange }: Props) {
   const hasAims = practicals.length > 0;
 
   const updateAt = (index: number, value: Practical) => {
-    if (!onChange) return;
     if (!hasAims && index === 0) {
-      onChange([value]);
+      setPracticals([value]);
       return;
     }
-    const next: Practical[] = [...practicals];
-    next[index] = value;
-    onChange(next);
+    updatePractical(index, value);
   };
 
   const removeAt = (index: number) => {
-    if (!onChange) return;
     if (!hasAims) {
-      onChange([]);
+      setPracticals([]);
       return;
     }
-    const next = practicals.filter((_, i) => i !== index);
-    // Keep existing numbers/order chaotic; do not renumber
-    onChange(next);
+    removePractical(index);
   };
 
   const addOne = () => {
-    if (!onChange) return;
-    const next = [...practicals, { number: 0, aim: "" }];
-    onChange(next);
+    addPractical();
   };
 
   const clearAll = () => {
-    if (!onChange) return;
-    onChange([]);
+    clear();
   };
 
   const list: Practical[] = hasAims ? practicals : [{ number: 0, aim: "" }];
