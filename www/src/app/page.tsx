@@ -18,7 +18,6 @@ export default function Home() {
     or you can just copy the blob of text here and let ai decide the AIMs
     `);
   const [isMarkdown, setIsMarkdown] = useState(true);
-  const practicals = usePracticalsStore((s) => s.practicals);
   const setPracticals = usePracticalsStore((s) => s.setPracticals);
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -39,8 +38,8 @@ export default function Home() {
         throw new Error("Failed to extract aims");
       }
 
-  const data = await response.json();
-  setPracticals(data.practicals);
+      const data = await response.json();
+      setPracticals(data.practicals);
       setIsMarkdown(false);
     } catch (error) {
       console.error("Error extracting aims:", error);

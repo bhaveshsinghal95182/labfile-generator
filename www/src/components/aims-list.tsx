@@ -10,6 +10,12 @@ import { Button } from "./ui/button";
 import { Practical } from "@/lib/types";
 import { AnimatePresence, motion } from "motion/react";
 import { usePracticalsStore } from "@/context/practicals-store";
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from "./ui/empty";
 
 export default function AimsList() {
   const practicals = usePracticalsStore((s) => s.practicals);
@@ -45,7 +51,7 @@ export default function AimsList() {
     clear();
   };
 
-  const list: Practical[] = hasAims ? practicals : [{ number: 0, aim: "" }];
+  const list: Practical[] = practicals;
 
   return (
     <Card>
@@ -62,6 +68,16 @@ export default function AimsList() {
         </CardAction>
       </CardHeader>
       <CardContent className="space-y-3">
+        {!hasAims && (
+          <Empty>
+            <EmptyHeader>
+              <EmptyTitle>No aims yet</EmptyTitle>
+              <EmptyDescription>
+                Click “Add aim” to create your first aim.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
+        )}
         <AnimatePresence initial={false}>
           {list.map((p, i) => (
             <motion.div
@@ -80,11 +96,9 @@ export default function AimsList() {
             </motion.div>
           ))}
         </AnimatePresence>
-        <div className="pt-2">
-          <Button type="button" variant="outline" onClick={addOne}>
+          <Button type="button" variant="outline" className="pt-2" onClick={addOne}>
             Add aim
           </Button>
-        </div>
       </CardContent>
     </Card>
   );
