@@ -10,12 +10,8 @@ import { Button } from "./ui/button";
 import { Practical } from "@/lib/types";
 import { AnimatePresence, motion } from "motion/react";
 import { usePracticalsStore } from "@/context/practicals-store";
-import {
-  Empty,
-  EmptyHeader,
-  EmptyTitle,
-  EmptyDescription,
-} from "./ui/empty";
+import { Empty, EmptyHeader, EmptyTitle, EmptyDescription } from "./ui/empty";
+import CreateFilesButton from "./create-files-button";
 
 export default function AimsList() {
   const practicals = usePracticalsStore((s) => s.practicals);
@@ -54,52 +50,60 @@ export default function AimsList() {
   const list: Practical[] = practicals;
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl">Aims</CardTitle>
-        <CardAction>
-          <Button
-            variant={"destructive"}
-            onClick={clearAll}
-            className="cursor-pointer"
-          >
-            Clear all
-          </Button>
-        </CardAction>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        {!hasAims && (
-          <Empty>
-            <EmptyHeader>
-              <EmptyTitle>No aims yet</EmptyTitle>
-              <EmptyDescription>
-                Click “Add aim” to create your first aim.
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        )}
-        <AnimatePresence initial={false}>
-          {list.map((p, i) => (
-            <motion.div
-              key={i}
-              layout
-              initial={{ opacity: 0, y: 8, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: "auto" }}
-              exit={{ opacity: 0, y: -8, height: 0 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+    <div className="">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">Aims</CardTitle>
+          <CardAction>
+            <Button
+              variant={"destructive"}
+              onClick={clearAll}
+              className="cursor-pointer"
             >
-              <Aim
-                value={p}
-                onChange={(v) => updateAt(i, v)}
-                onDelete={() => removeAt(i)}
-              />
-            </motion.div>
-          ))}
-        </AnimatePresence>
-          <Button type="button" variant="outline" className="pt-2" onClick={addOne}>
+              Clear all
+            </Button>
+          </CardAction>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          {!hasAims && (
+            <Empty>
+              <EmptyHeader>
+                <EmptyTitle>No aims yet</EmptyTitle>
+                <EmptyDescription>
+                  Click “Add aim” to create your first aim.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          )}
+          <AnimatePresence initial={false}>
+            {list.map((p, i) => (
+              <motion.div
+                key={i}
+                layout
+                initial={{ opacity: 0, y: 8, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -8, height: 0 }}
+                transition={{ duration: 0.2, ease: "easeOut" }}
+              >
+                <Aim
+                  value={p}
+                  onChange={(v) => updateAt(i, v)}
+                  onDelete={() => removeAt(i)}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+          <Button
+            type="button"
+            variant="outline"
+            className="pt-2 cursor-pointer"
+            onClick={addOne}
+          >
             Add aim
           </Button>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <CreateFilesButton />
+    </div>
   );
 }
