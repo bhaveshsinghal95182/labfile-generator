@@ -5,6 +5,10 @@ import { MultiStepLoader } from "./ui/multi-step-loader";
 import { usePracticalsStore } from "@/context/practicals-store";
 import SystemInstructionDialog from "./system-instruction-dialog";
 import { useSystemInstructionStore } from "@/context/system-instruction-store";
+import { useStructureStore } from "@/context/structure-store";
+import { savePracticals } from "@/lib/idb";
+import { useRouter } from "next/navigation";
+import { StoredPractical } from "@/lib/types";
 
 export default function CreateFilesButton() {
   const [loading, setLoading] = useState(false);
@@ -12,6 +16,9 @@ export default function CreateFilesButton() {
   const [siOpen, setSiOpen] = useState(false);
   const practicals = usePracticalsStore((s) => s.practicals);
   const systemInstruction = useSystemInstructionStore((s) => s.systemInstruction);
+  const model = useSystemInstructionStore((s) => s.model);
+  const sections = useStructureStore((s) => s.sections);
+  const router = useRouter();
 
   // Build dynamic loading states from aims in the store; fall back to 3 generic steps
   const dynamicStates = (practicals
@@ -33,6 +40,8 @@ export default function CreateFilesButton() {
     setLoading(true);
     setStep(0);
 
+    const now = Date.now();
+    const docs: StoredPractical[] = [];
     try {
       for (let i = 0; i < loadingStates.length; i++) {
         setStep(i);
@@ -40,17 +49,46 @@ export default function CreateFilesButton() {
         const res = await fetch("/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ aim: aimText, systemInstruction }),
+          body: JSON.stringify({ aim: aimText, systemInstruction, model, sections }),
         });
         // Non-fatal error handling; continue to next aim
         if (!res.ok) {
           // Optionally: log or toast error
+          docs.push({
+            id: (globalThis.crypto?.randomUUID?.() || `${now}-${Math.random()}`).toString(),
+            aim: aimText,
+            markdown: "",
+            sections,
+            systemInstruction,
+            model,
+            createdAt: now + i,
+            updatedAt: now + i,
+          });
+          continue;
         }
-        // await res.json(); // not strictly needed
+        const data: { ok: boolean; aim: string; markdown: string } = await res.json();
+        docs.push({
+          id: (globalThis.crypto?.randomUUID?.() || `${now}-${Math.random()}`).toString(),
+          aim: data.aim || aimText,
+          markdown: data.markdown || "",
+          sections,
+          systemInstruction,
+          model,
+          createdAt: now + i,
+          updatedAt: now + i,
+        });
       }
     } finally {
-      setLoading(false);
-      setStep(0);
+      try {
+        await savePracticals(docs);
+      } catch (e) {
+        console.error("Failed to save practicals to IndexedDB", e);
+      } finally {
+        setLoading(false);
+        setStep(0);
+        // Navigate to editor once loader completes
+        router.push("/editor");
+      }
     }
   };
 
