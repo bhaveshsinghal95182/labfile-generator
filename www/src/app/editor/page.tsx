@@ -60,14 +60,14 @@ export default function EditorPage() {
   // Debounced save of markdown and title changes
   useEffect(() => {
     if (!selectedId) return;
-  if (saveTimer.current) clearTimeout(saveTimer.current);
+    if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => {
       // fire-and-forget; doSave handles its own state
       void doSave(selectedId, title, markdown);
     }, 500);
 
     return () => {
-  if (saveTimer.current) clearTimeout(saveTimer.current);
+      if (saveTimer.current) clearTimeout(saveTimer.current);
     };
   }, [markdown, title, selectedId]);
 
